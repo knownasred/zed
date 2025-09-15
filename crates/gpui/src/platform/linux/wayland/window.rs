@@ -483,27 +483,9 @@ impl WaylandWindowStatePtr {
         if let xdg_surface::Event::Configure { serial } = event {
             {
                 let mut state = self.state.borrow_mut();
+                if let Some(window_controls) = state.in_progress_window_controls.take() {
+                    state.window_controls = window_controls;
 
-                state.surface_state.ack_configure(serial);
-
-                let window_geometry = inset_by_tiling(
-                    state.bounds.map_origin(|_| px(0.0)),
-                    state.inset(),
-                    state.tiling,
-                )
-                .map(|v| v.0 as i32)
-                .map_size(|v| if v <= 0 { 1 } else { v });
-
-                state.surface_state.set_geometry(
-                    window_geometry.origin.x,
-                    window_geometry.origin.y,
-                    window_geometry.size.width,
-                    window_geometry.size.height,
-                );
-
-                let request_frame_callback = !state.acknowledged_first_configure;
-                if request_frame_callback {
-                    state.acknowledged_first_configure = true;
                     drop(state);
                     let mut callbacks = self.callbacks.borrow_mut();
                     if let Some(appearance_changed) = callbacks.appearance_changed.as_mut() {
