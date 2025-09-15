@@ -545,22 +545,6 @@ impl WaylandWindowStatePtr {
                 }
             }
             let mut state = self.state.borrow_mut();
-            state.xdg_surface.ack_configure(serial);
-
-            let window_geometry = inset_by_tiling(
-                state.bounds.map_origin(|_| px(0.0)),
-                state.inset(),
-                state.tiling,
-            )
-            .map(|v| v.0 as i32)
-            .map_size(|v| if v <= 0 { 1 } else { v });
-
-            state.xdg_surface.set_window_geometry(
-                window_geometry.origin.x,
-                window_geometry.origin.y,
-                window_geometry.size.width,
-                window_geometry.size.height,
-            );
 
             let request_frame_callback = !state.acknowledged_first_configure;
             if request_frame_callback {
